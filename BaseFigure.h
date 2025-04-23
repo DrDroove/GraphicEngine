@@ -69,6 +69,8 @@ public:
     {
         return color;
     }
+    /*virtual int getX() = 0;
+    virtual int getY() = 0;*/
 
     void setType(TypeElem _type)
     {

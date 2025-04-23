@@ -122,6 +122,7 @@
     <ClCompile Include="Dot.cpp" />
     <ClCompile Include="Line.cpp" />
     <ClCompile Include="MyForm.cpp" />
+    <ClCompile Include="Plex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseFigure.h" />
@@ -130,6 +131,7 @@
     <ClInclude Include="MyForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="Plex.h" />
     <ClInclude Include="strToWords.h" />
   </ItemGroup>
   <ItemGroup>

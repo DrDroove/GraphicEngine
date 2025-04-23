@@ -337,6 +337,7 @@ namespace GraphicEngine {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(12, 25);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->AutoSize = true;
 			this->BackColor = System::Drawing::Color::DarkMagenta;
 			this->ClientSize = System::Drawing::Size(2140, 1166);
 			this->Controls->Add(this->GridDots);
