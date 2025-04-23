@@ -78,7 +78,7 @@ namespace GraphicEngine {
 	private: System::Windows::Forms::Button^ savePlexButtom;
 	private: System::Windows::Forms::RadioButton^ DotButton;
 	private: System::Windows::Forms::RadioButton^ LineButton;
-	private: System::Windows::Forms::TextBox^ TestText;
+
 
 
 	protected:
@@ -126,7 +126,6 @@ namespace GraphicEngine {
 			this->savePlexButtom = (gcnew System::Windows::Forms::Button());
 			this->DotButton = (gcnew System::Windows::Forms::RadioButton());
 			this->LineButton = (gcnew System::Windows::Forms::RadioButton());
-			this->TestText = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->picture))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->GridDots))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->GridLines))->BeginInit();
@@ -368,13 +367,6 @@ namespace GraphicEngine {
 			this->LineButton->UseVisualStyleBackColor = true;
 			this->LineButton->CheckedChanged += gcnew System::EventHandler(this, &MyForm::changeToLine);
 			// 
-			// TestText
-			// 
-			this->TestText->Location = System::Drawing::Point(648, 60);
-			this->TestText->Name = L"TestText";
-			this->TestText->Size = System::Drawing::Size(338, 31);
-			this->TestText->TabIndex = 4;
-			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(12, 25);
@@ -382,7 +374,6 @@ namespace GraphicEngine {
 			this->AutoSize = true;
 			this->BackColor = System::Drawing::Color::DarkMagenta;
 			this->ClientSize = System::Drawing::Size(2140, 1166);
-			this->Controls->Add(this->TestText);
 			this->Controls->Add(this->LineButton);
 			this->Controls->Add(this->DotButton);
 			this->Controls->Add(this->GridDots);
@@ -438,6 +429,7 @@ namespace GraphicEngine {
 
 			for (int i = 0; i < Dots.size(); i++)
 			{
+				GridDots->Rows[i]->Cells[0]->Value = gcnew String(Dots[i]->getName().data());
 				GridDots->Rows[i]->Cells[1]->Value = System::Convert::ToString(Dots[i]->getX());
 				GridDots->Rows[i]->Cells[2]->Value = System::Convert::ToString(Dots[i]->getY());
 				GridDots->Rows[i]->Cells[3]->Value = System::Convert::ToString(Dots[i]->getColor());
@@ -565,11 +557,11 @@ namespace GraphicEngine {
 private: System::Void changeToDot(System::Object^ sender, System::EventArgs^ e) {
 	state = 0; //dot==0 state
 	lineModClickCount = 0;
-	TestText->Text = state.ToString();
+	
 }
 private: System::Void changeToLine(System::Object^ sender, System::EventArgs^ e) {
 	state = 1;
-	TestText->Text = state.ToString();
+	
 }
 };
 }
