@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Dot.h"
+#include"Line.h"
 #include <vector>
 #include <set>
 #include <queue>
 #include <iostream>
 #include <msclr\marshal_cppstd.h>
+#include <algorithm>
 
 namespace GraphicEngine {
 
@@ -20,6 +22,7 @@ namespace GraphicEngine {
 	/// Сводка для MyForm
 	/// </summary>
 	std::vector<Dot*> Dots;
+	std::vector<Line*> Lines;
 
 	std::set<Dot> setik;
 	public ref class MyForm : public System::Windows::Forms::Form
@@ -73,6 +76,9 @@ namespace GraphicEngine {
 	private: System::Windows::Forms::Label^ label4;
 	private: System::Windows::Forms::Button^ ReadPlexButton;
 	private: System::Windows::Forms::Button^ savePlexButtom;
+	private: System::Windows::Forms::RadioButton^ DotButton;
+	private: System::Windows::Forms::RadioButton^ LineButton;
+	private: System::Windows::Forms::TextBox^ TestText;
 
 
 	protected:
@@ -118,6 +124,9 @@ namespace GraphicEngine {
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->ReadPlexButton = (gcnew System::Windows::Forms::Button());
 			this->savePlexButtom = (gcnew System::Windows::Forms::Button());
+			this->DotButton = (gcnew System::Windows::Forms::RadioButton());
+			this->LineButton = (gcnew System::Windows::Forms::RadioButton());
+			this->TestText = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->picture))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->GridDots))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->GridLines))->BeginInit();
@@ -126,12 +135,13 @@ namespace GraphicEngine {
 			// picture
 			// 
 			this->picture->BackColor = System::Drawing::Color::White;
-			this->picture->Location = System::Drawing::Point(24, 41);
+			this->picture->Location = System::Drawing::Point(24, 111);
 			this->picture->Margin = System::Windows::Forms::Padding(6);
 			this->picture->Name = L"picture";
 			this->picture->Size = System::Drawing::Size(1000, 961);
 			this->picture->TabIndex = 0;
 			this->picture->TabStop = false;
+			this->picture->Click += gcnew System::EventHandler(this, &MyForm::picture_Click);
 			this->picture->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &MyForm::pict_MouseDown);
 			// 
 			// GridDots
@@ -333,6 +343,38 @@ namespace GraphicEngine {
 			this->savePlexButtom->Size = System::Drawing::Size(75, 23);
 			this->savePlexButtom->TabIndex = 0;
 			// 
+			// DotButton
+			// 
+			this->DotButton->AutoSize = true;
+			this->DotButton->Checked = true;
+			this->DotButton->Location = System::Drawing::Point(104, 63);
+			this->DotButton->Name = L"DotButton";
+			this->DotButton->Size = System::Drawing::Size(76, 29);
+			this->DotButton->TabIndex = 2;
+			this->DotButton->TabStop = true;
+			this->DotButton->Text = L"Dot";
+			this->DotButton->UseVisualStyleBackColor = true;
+			this->DotButton->CheckedChanged += gcnew System::EventHandler(this, &MyForm::changeToDot);
+			// 
+			// LineButton
+			// 
+			this->LineButton->AutoSize = true;
+			this->LineButton->Location = System::Drawing::Point(362, 63);
+			this->LineButton->Name = L"LineButton";
+			this->LineButton->Size = System::Drawing::Size(84, 29);
+			this->LineButton->TabIndex = 3;
+			this->LineButton->Text = L"Line";
+			this->LineButton->TextAlign = System::Drawing::ContentAlignment::BottomCenter;
+			this->LineButton->UseVisualStyleBackColor = true;
+			this->LineButton->CheckedChanged += gcnew System::EventHandler(this, &MyForm::changeToLine);
+			// 
+			// TestText
+			// 
+			this->TestText->Location = System::Drawing::Point(648, 60);
+			this->TestText->Name = L"TestText";
+			this->TestText->Size = System::Drawing::Size(338, 31);
+			this->TestText->TabIndex = 4;
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(12, 25);
@@ -340,6 +382,9 @@ namespace GraphicEngine {
 			this->AutoSize = true;
 			this->BackColor = System::Drawing::Color::DarkMagenta;
 			this->ClientSize = System::Drawing::Size(2140, 1166);
+			this->Controls->Add(this->TestText);
+			this->Controls->Add(this->LineButton);
+			this->Controls->Add(this->DotButton);
 			this->Controls->Add(this->GridDots);
 			this->Controls->Add(this->picture);
 			this->Margin = System::Windows::Forms::Padding(6);
@@ -350,6 +395,7 @@ namespace GraphicEngine {
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->GridDots))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->GridLines))->EndInit();
 			this->ResumeLayout(false);
+			this->PerformLayout();
 
 		}
 #pragma endregion
@@ -360,6 +406,10 @@ namespace GraphicEngine {
 		int DotName = -1;
 		int COLOR = 2550255;
 		int m_prevX, m_prevY;
+		int state = 0;
+		int lineModClickCount = 0;
+		Dot* first = nullptr;
+		Dot* second = nullptr;
 
 		System::Void MyForm_Load(System::Object^ sender, System::EventArgs^ e) {
 			Image = gcnew Bitmap(picture->Width, picture->Height);
@@ -421,7 +471,15 @@ namespace GraphicEngine {
 			//groupBox1->Visible = true;
 			int X = e->X;
 			int Y = e->Y;
-			if (e->Button == System::Windows::Forms::MouseButtons::Left)
+			int index = -1;
+			
+			for (int i = 0; i <  Dots.size(); i++) {
+				if(Dots[i]->IsFigure(X, Y)) {
+					index = i;
+					break;
+				}
+			}
+			if (e->Button == System::Windows::Forms::MouseButtons::Left && state==0 && index ==-1)
 			{
 				Image = gcnew Bitmap(picture->Image);
 				std::string name = GeneratingNewName();
@@ -431,10 +489,45 @@ namespace GraphicEngine {
 				PrintDotsDataGrid();
 				DrawDots();
 			}
-			else if (e->Button == System::Windows::Forms::MouseButtons::Right)
+			else if (e->Button == System::Windows::Forms::MouseButtons::Left && state == 1 && lineModClickCount % 2 == 0)
 			{
-				m_prevX = X;
-				m_prevY = Y;
+				if (index == -1) {
+					Image = gcnew Bitmap(picture->Image);
+					std::string name = GeneratingNewName();
+
+					Dots.push_back(new Dot(name, X, Y));
+					Dots.back()->setColor(COLOR);
+					PrintDotsDataGrid();
+					DrawDots();
+					first = Dots.back();
+				}
+				else {
+					first = Dots[index];
+				}
+				lineModClickCount++;
+			}
+			else if (e->Button == System::Windows::Forms::MouseButtons::Left && state == 1 && lineModClickCount % 2 == 1) {
+				
+				if (index == -1) {
+					Image = gcnew Bitmap(picture->Image);
+					std::string name = GeneratingNewName();
+
+					Dots.push_back(new Dot(name, X, Y));
+					Dots.back()->setColor(COLOR);
+					PrintDotsDataGrid();
+					DrawDots();
+					second = Dots.back();
+				}
+				else {
+					second = Dots[index];
+				}
+
+				Lines.push_back(new Line(first, second));
+				first = nullptr;
+				second = nullptr;
+				Lines.back()->setColor(COLOR);
+				DrawLines();
+				lineModClickCount++;
 			}
 		}
 
@@ -453,7 +546,30 @@ namespace GraphicEngine {
 				picture->Invalidate();
 			}
 		}
+		void DrawLines() {
+			for (int i = 0; i < Lines.size(); i++)
+			{
+				delete g;
+				g = Graphics::FromImage(Image);
+				picture->Image = Image;
+				Lines[i]->setColor(COLOR);
+				Lines[i]->Draw(g);
+				picture->Refresh();
+				picture->Invalidate();
+			}
+		}
+		
 
-
-	};
+	private: System::Void picture_Click(System::Object^ sender, System::EventArgs^ e) {
+	}
+private: System::Void changeToDot(System::Object^ sender, System::EventArgs^ e) {
+	state = 0; //dot==0 state
+	lineModClickCount = 0;
+	TestText->Text = state.ToString();
+}
+private: System::Void changeToLine(System::Object^ sender, System::EventArgs^ e) {
+	state = 1;
+	TestText->Text = state.ToString();
+}
+};
 }

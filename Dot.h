@@ -34,7 +34,7 @@ public:
         if (isVisible == false) return;
         int tmp = color;
         System::Drawing::SolidBrush^ brush = gcnew System::Drawing::SolidBrush(System::Drawing::Color::FromArgb(255,0,255));
-        g->FillEllipse(brush, x, y, boldness, boldness);
+        g->FillEllipse(brush, x-boldness/2, y-boldness/2, boldness, boldness);
     }
     bool inArea(int x, int y){
         if((this->x - x)*(this->x - x) + (this->y - y)*(this->y - y) <= std::pow(boldness/2, 2)){

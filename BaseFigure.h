@@ -17,7 +17,7 @@ protected:
     int rating;
 public:
     BaseFigure(TypeElem _type = _Point, std::string _name = "", int _radius = 12, bool _isVisible = true,
-        int _color = 0, int _boldness = 12, int _rating = 1)
+        int _color = 0, int _boldness = 6, int _rating = 1)
     {
         type = _type;
         name = _name;

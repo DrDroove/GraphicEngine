@@ -12,9 +12,9 @@
 #include<string>
 #include "BaseFigure.h"
 #include "Dot.h"
-#include<stdio>
 
-class Line:protected BaseFigure{
+
+class Line:public BaseFigure{
 protected:
     BaseFigure* left;
     BaseFigure* right;
@@ -58,8 +58,20 @@ public:
         int h = (2 * std::sqrt(halfPerimetr * (halfPerimetr - a) * (halfPerimetr - lengthA) * (halfPerimetr - lengthB)));
     }
     //преобразование в строку и обратно как в точке
-    
-    
+    void Draw(System::Drawing::Graphics^ g) override
+    {
+        if (isVisible == false) return;
+        int tmp = color;
+        System::Drawing::SolidBrush^ brush = gcnew System::Drawing::SolidBrush(System::Drawing::Color::FromArgb(255, 0, 255));
+        g->DrawLine(gcnew System::Drawing::Pen(brush), ((Dot*)left)->getX(), ((Dot*)left)->getY(), ((Dot*)right)->getX(), ((Dot*)right)->getY());
+    }
+    std::string to_string() override{
+        return "workInProgress";
+    }
+    void IncRating(int dr){}
+    bool IsFigure(int _x, int _y) {
+        return false;
+    }
 };
 
 #endif Line_hpp 
