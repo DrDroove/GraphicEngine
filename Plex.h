@@ -2,138 +2,98 @@
 #include"BaseFigure.h"
 #include"Dot.h"
 #include"Line.h"
+
 #include<stack>
-ref class Plex
+#include<stdexcept>
+
+
+class Plex
 {
+public:
+	static Plex* instance;
 private:
 	BaseFigure* root;
-public:
+	
 	Plex() {
 		root = nullptr;
 	}
-	Plex(const Plex^ source) {
-		std::stack<BaseFigure*> Ls;
-		std::stack<BaseFigure*> copies;
-		Ls.push(nullptr);
-		Dot* duplicates[1000];
-		BaseFigure* curr = source->root;
-		while (curr != nullptr) {
-			switch (curr->getType()) {
-			case _Point:
-				if (curr->getRating() > 1) {
-					//searchByName ? p = dupl[l]&push : new p & push & dupl[n] = p
-				}
-				Dot* p = new Dot(*(Dot*)curr);
-				copies.push(p);
-				break;
-			case _Line:
-				switch (curr->getRating()) {
-				case 1:
-					Ls.push(curr);
-					curr->changeRating();
-					curr = ((Line*)curr)->getLeft();
-					break;
-				case 2:
-					curr = ((Line*)curr)->getRight();
-					curr->changeRating();
-					break;
-				case 3:
-					BaseFigure * right = copies.top(); copies.pop();
-					BaseFigure* left = copies.top(); copies.pop();
-					Line* p = new Line(*(Line*)curr);
-					p->setLeft((Dot*)left);
-					p->setRight((Dot*)right);
-					copies.push(p);
-					curr->changeRating();
-					curr = Ls.top();
-					Ls.pop();
-					break;
-				}
-				break;
-			}
-			root = copies.top();
+public:
+	static Plex* getInstance() {
+		if (instance == nullptr) {
+			instance = new Plex();
 		}
+		return instance;
+	}
+	/*BaseFigure* getRoot() {
+		return root;
+	}*/
+	
+	Plex(const Plex& source) = delete;
+	Plex& operator=(const Plex& source) = delete;
 
-	}
-	Plex^ operator=(const Plex^ source) {
-		delete root;
-		Plex tmp(source);
-		root = tmp.root;
-		delete tmp.root;
-		return this;
-	}
-	~Plex() {
-		std::stack<BaseFigure*> Ls;
-		Ls.push(nullptr);
-		BaseFigure* curr = root;
-		while (curr) {
-			switch (curr->getType()) {
-			case _Point:
-				if (curr->getRating() > 1) {
-					curr->changeRating(-1);
-					curr = Ls.top(); Ls.pop();
-				}
-				else {
-					BaseFigure* p = curr;
-					delete p;
-					curr = Ls.top(); Ls.pop();
-				}
-				break;
-			default:
-				curr->changeRating();
-				switch (curr->getRating()) {
-				case 1:
-					Ls.push(curr);
-					curr = ((Line*)curr)->getLeft();
-					break;
-				case 2:
-					Ls.push(curr);
-					curr = ((Line*)curr)->getRight();
-					break;
-				case 3:
-					BaseFigure * p = curr;
-					delete p;
-					curr = Ls.top(); Ls.pop();
-					break;
-				}
+	BaseFigure* findLineByDot(BaseFigure* curr, BaseFigure* ref) { //finds first line that based on referenced dot
+		if (curr->getType() == _Line) {
+			if (((Line*)curr)->getLeft() == ref || ((Line*)curr)->getRight() == ref) {
+				return curr;
 			}
+			BaseFigure* result = findLineByDot(((Line*)curr)->getLeft(), ref);
+			if (result != NULL) { return result; }
+			result = findLineByDot(((Line*)curr)->getRight(), ref);
+			return result;
+		}
+		else if (curr->getType() == _Point) {
+			return NULL;
 		}
 	}
-	Dot* searchByName(std::string name) {
-		std::stack<BaseFigure*> Ls;
-		Ls.push(nullptr);
-		Dot* res = nullptr;
-		BaseFigure* curr = root;
-		while (curr) {
-			switch (curr->getType()){
-			case _Point:
-				if (curr->getName() == name) {
-					return (Dot*)curr;
-				}
+
+	void Add(BaseFigure* what) { //always lower left is the connecting one to the upper
+		if (what->getType() != _Line) {
+			
+			throw std::invalid_argument("Not a line");
+		}
+		else if (root == nullptr) {
+			root = what;
+			return;
+		}
+		BaseFigure* result = findLineByDot(root, ((Line*)what)->getLeft());
+		if (result != NULL) {
+			if (((Line*)what)->getLeft() == ((Line*)result)->getLeft()) {
+				((Line*)result)->setLeft(what);
+				return;
+			}
+			else {
+				((Line*)result)->setRight(what);
+				return;
 			}
 		}
+		result = findLineByDot(root, ((Line*)what)->getRight());
+		if (result != NULL) {
+			if (((Line*)what)->getRight() == ((Line*)result)->getLeft()) {
+				((Line*)what)->inverse();
+				((Line*)result)->setLeft(what);
+				return;
+			}
+			else {
+				((Line*)what)->inverse();
+				((Line*)result)->setRight(what);
+				return;
+			}
+		}
+		throw std::invalid_argument("The line is not connected to the others");
 	}
-	//Line* searchByName(std::string name);
-	Dot* searchByPlace(int x, int y) {
-
+	void traverse(BaseFigure* curr) {
+		if (curr->getType() == _Line) {
+			Line* smth = ((Line*)curr);
+			traverse(((Line*)curr)->getLeft());
+			traverse(((Line*)curr)->getRight());
+			return;
+		}
+		else if (curr->getType() == _Point) {
+			return;
+		}
 	}
-	//void connect(Dot* whem, Line* what) {
 
-	//}
-	////Line* searchByPlace(int x, int y);
-	//void add(BaseFigure* source) {
-	//	if (!root) {
-	//		root = source;
-	//		return;
-	//	}
-	//	Dot* left = searchByName((((Line*)source)->getLeft()->getName()));
-	//	Dot* right = searchByName((((Line*)source)->getRight()->getName()));
-	//	if (left&&!right) {
-	//		connect(left, (Line*)source);
-	//	}
-	//	else if (left && right) {
-	//		((Line*)source)->inverse(); connect(right, (Line*)source);
-	//	}
-	//	return;
-	//}
+	void traverseAll() {
+		traverse(root);
+	}
 };

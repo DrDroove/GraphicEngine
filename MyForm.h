@@ -8,6 +8,8 @@
 #include <iostream>
 #include <msclr\marshal_cppstd.h>
 #include <algorithm>
+#include"Plex.h"
+#include<stdexcept>
 
 namespace GraphicEngine {
 
@@ -25,6 +27,10 @@ namespace GraphicEngine {
 	std::vector<Line*> Lines;
 
 	std::set<Dot> setik;
+
+	Plex* storage = storage->getInstance();
+	int counter = 0;
+
 	public ref class MyForm : public System::Windows::Forms::Form
 	{
 	public:
@@ -78,6 +84,7 @@ namespace GraphicEngine {
 	private: System::Windows::Forms::Button^ savePlexButtom;
 	private: System::Windows::Forms::RadioButton^ DotButton;
 	private: System::Windows::Forms::RadioButton^ LineButton;
+	private: System::Windows::Forms::Button^ showPlex;
 
 
 
@@ -126,6 +133,7 @@ namespace GraphicEngine {
 			this->savePlexButtom = (gcnew System::Windows::Forms::Button());
 			this->DotButton = (gcnew System::Windows::Forms::RadioButton());
 			this->LineButton = (gcnew System::Windows::Forms::RadioButton());
+			this->showPlex = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->picture))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->GridDots))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->GridLines))->BeginInit();
@@ -367,6 +375,16 @@ namespace GraphicEngine {
 			this->LineButton->UseVisualStyleBackColor = true;
 			this->LineButton->CheckedChanged += gcnew System::EventHandler(this, &MyForm::changeToLine);
 			// 
+			// showPlex
+			// 
+			this->showPlex->Location = System::Drawing::Point(505, 56);
+			this->showPlex->Name = L"showPlex";
+			this->showPlex->Size = System::Drawing::Size(496, 46);
+			this->showPlex->TabIndex = 4;
+			this->showPlex->Text = L"Show Plex";
+			this->showPlex->UseVisualStyleBackColor = true;
+			this->showPlex->Click += gcnew System::EventHandler(this, &MyForm::sshowPlex);
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(12, 25);
@@ -374,6 +392,7 @@ namespace GraphicEngine {
 			this->AutoSize = true;
 			this->BackColor = System::Drawing::Color::DarkMagenta;
 			this->ClientSize = System::Drawing::Size(2140, 1166);
+			this->Controls->Add(this->showPlex);
 			this->Controls->Add(this->LineButton);
 			this->Controls->Add(this->DotButton);
 			this->Controls->Add(this->GridDots);
@@ -464,14 +483,14 @@ namespace GraphicEngine {
 			int X = e->X;
 			int Y = e->Y;
 			int index = -1;
-			
-			for (int i = 0; i <  Dots.size(); i++) {
-				if(Dots[i]->IsFigure(X, Y)) {
+
+			for (int i = 0; i < Dots.size(); i++) {
+				if (Dots[i]->IsFigure(X, Y)) {
 					index = i;
 					break;
 				}
 			}
-			if (e->Button == System::Windows::Forms::MouseButtons::Left && state==0 && index ==-1)
+			if (e->Button == System::Windows::Forms::MouseButtons::Left && state == 0 && index == -1)
 			{
 				Image = gcnew Bitmap(picture->Image);
 				std::string name = GeneratingNewName();
@@ -499,7 +518,7 @@ namespace GraphicEngine {
 				lineModClickCount++;
 			}
 			else if (e->Button == System::Windows::Forms::MouseButtons::Left && state == 1 && lineModClickCount % 2 == 1) {
-				
+
 				if (index == -1) {
 					Image = gcnew Bitmap(picture->Image);
 					std::string name = GeneratingNewName();
@@ -518,8 +537,19 @@ namespace GraphicEngine {
 				first = nullptr;
 				second = nullptr;
 				Lines.back()->setColor(COLOR);
-				DrawLines();
+				try {
+					storage->Add(Lines.back());
+				}
+				catch (std::invalid_argument e) {
+					Lines.back()->setisVisible(false);
+				}
+				delete g;
+				g = Graphics::FromImage(Image);
+				Lines.back()->Draw(g);
+				picture->Refresh();
+				picture->Invalidate();
 				lineModClickCount++;
+				counter++;
 			}
 		}
 
@@ -538,7 +568,7 @@ namespace GraphicEngine {
 				picture->Invalidate();
 			}
 		}
-		void DrawLines() {
+		/*void DrawLines() {
 			for (int i = 0; i < Lines.size(); i++)
 			{
 				delete g;
@@ -549,19 +579,23 @@ namespace GraphicEngine {
 				picture->Refresh();
 				picture->Invalidate();
 			}
-		}
-		
+		}*/
+
 
 	private: System::Void picture_Click(System::Object^ sender, System::EventArgs^ e) {
 	}
-private: System::Void changeToDot(System::Object^ sender, System::EventArgs^ e) {
-	state = 0; //dot==0 state
-	lineModClickCount = 0;
-	
-}
-private: System::Void changeToLine(System::Object^ sender, System::EventArgs^ e) {
-	state = 1;
-	
-}
+	private: System::Void changeToDot(System::Object^ sender, System::EventArgs^ e) {
+		state = 0; //dot==0 state
+		lineModClickCount = 0;
+
+	}
+	private: System::Void changeToLine(System::Object^ sender, System::EventArgs^ e) {
+		state = 1;
+
+	}
+	private: System::Void sshowPlex(System::Object^ sender, System::EventArgs^ e) {
+		storage->traverseAll();
+	}
+
 };
 }

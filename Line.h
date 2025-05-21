@@ -20,6 +20,7 @@ protected:
     BaseFigure* right;
 public:
     Line(Dot* left, Dot* right){
+        type = _Line;
         name = left->getName() + " " + right->getName();
         color = 0;
         boldness = 5;
@@ -78,10 +79,10 @@ public:
     BaseFigure* getRight() {
         return right;
     }
-    void setLeft(Dot* source) {
+    void setLeft(BaseFigure* source) {
         left = source;
     }
-    void setRight(Dot* source) {
+    void setRight(BaseFigure* source) {
         right = source;
     }
 };
