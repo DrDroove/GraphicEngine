@@ -72,6 +72,18 @@ public:
     bool IsFigure(int _x, int _y) {
         return false;
     }
+    BaseFigure* getLeft() {
+        return left;
+    }
+    BaseFigure* getRight() {
+        return right;
+    }
+    void setLeft(Dot* source) {
+        left = source;
+    }
+    void setRight(Dot* source) {
+        right = source;
+    }
 };
 
 #endif Line_hpp 
